@@ -1,8 +1,5 @@
 package com.amora.storyappcompose.ui.login
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.amora.storyappcompose.data.MainRepository
@@ -14,8 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onEmpty
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -41,17 +36,19 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private suspend fun loginProceed(request: LoginRequests) {
-        repository.login(
-            request = request,
-            onSuccess = {
-                _state.value = DataState.Success(it)
-            },
-            onError = {
-                updateError(it)
-            }).onStart {
-            _state.value = DataState.Loading()
-        }.collect()
+    private fun loginProceed(request: LoginRequests) {
+        viewModelScope.launch {
+            repository.login(
+                request = request,
+                onSuccess = {
+                    _state.value = DataState.Success(it)
+                },
+                onError = {
+                    updateError(it)
+                }).onStart {
+                _state.value = DataState.Loading()
+            }.collect()
+        }
     }
 
     fun updateError(message: String) {

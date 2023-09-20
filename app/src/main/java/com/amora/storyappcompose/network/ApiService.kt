@@ -58,7 +58,7 @@ interface ApiService {
 		@Header(AUTH) token: String,
 		@Query("page") page: Int?,
 		@Query("size") size: Int?,
-		@Query("location") location: Int?
+		@Query("location") location: Double?
 	): ApiResponse<StoriesResponse>
 
 	@GET("/stories/{id}")

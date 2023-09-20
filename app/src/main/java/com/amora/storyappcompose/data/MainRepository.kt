@@ -3,6 +3,7 @@ package com.amora.storyappcompose.data
 import com.amora.storyappcompose.model.LoginRequests
 import com.amora.storyappcompose.model.LoginResponse
 import com.amora.storyappcompose.model.RegisterRequest
+import com.amora.storyappcompose.model.StoriesResponse
 import com.amora.storyappcompose.model.StoryRequest
 import com.amora.storyappcompose.model.User
 import com.amora.storyappcompose.network.ApiService
@@ -15,6 +16,8 @@ import com.skydoves.sandwich.onException
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.suspendOnSuccess
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onCompletion
@@ -34,8 +37,10 @@ class MainRepository @Inject constructor(
 		sessionManager.deleteSession()
 	}
 
-	fun getSession(): User? {
-		return sessionManager.getSession()
+	private fun getSession(): Flow<User?> {
+		return flow {
+			emit(sessionManager.getSession())
+		}.flowOn(Dispatchers.Default)
 	}
 
 	fun login(
@@ -81,12 +86,13 @@ class MainRepository @Inject constructor(
 	}.onStart { onStart() }.onCompletion { onCompletion() }.flowOn(Dispatchers.IO)
 
 	fun postStory(
-		token: String,
 		request: StoryRequest,
 		onStart: () -> Unit,
 		onError: (String) -> Unit,
 		onCompletion: () -> Unit
 	) = flow {
+		val userSession = getSession().firstOrNull()
+		val token = "Bearer ${userSession?.token}"
 		val description = request.description.toRequestBodyPart()
 		val photoUri = request.photo
 		val filePhoto = File(photoUri)
@@ -109,32 +115,34 @@ class MainRepository @Inject constructor(
 	}.onStart { onStart() }.onCompletion { onCompletion() }.flowOn(Dispatchers.IO)
 
 	fun getStories(
-		token: String,
-		page: Int,
-		size: Int,
-		location: Int,
-		onStart: () -> Unit,
-		onError: (String) -> Unit,
-		onCompletion: () -> Unit
+		page: Int?,
+		size: Int?,
+		location: Double?,
+		onSuccess: (StoriesResponse) -> Unit,
+		onError: (String) -> Unit
 	) = flow {
+		val userSession = getSession().firstOrNull()
+		val token = "Bearer ${userSession?.token}"
 		val getStories =
 			apiService.getAllStories(token = token, page = page, size = size, location = location)
 		getStories.suspendOnSuccess {
-			emit(data.message)
+			emit(data)
+			onSuccess(data)
 		}.onFailure {
 			onError(message())
 		}.onError {
 			onError(message())
 		}
-	}.onStart { onStart() }.onCompletion { onCompletion() }.flowOn(Dispatchers.IO)
+	}.flowOn(Dispatchers.IO)
 
 	fun getStory(
-		token: String,
 		id: String,
 		onStart: () -> Unit,
 		onError: (String) -> Unit,
 		onCompletion: () -> Unit
 	) = flow {
+		val userSession = getSession().firstOrNull()
+		val token = "Bearer ${userSession?.token}"
 		val getStory = apiService.getStoriesById(token = token, id = id)
 		getStory.suspendOnSuccess {
 			emit(data.message)
