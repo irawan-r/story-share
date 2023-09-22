@@ -23,17 +23,17 @@ data class StoryItem(
 	val createdAt: String? = null,
 
 	@Json(name="name")
-	val name: String? = null,
+	val name: String,
 
 	@Json(name="description")
 	val description: String? = null,
 
 	@Json(name="lon")
-	val lon: Any? = null,
+	val lon: Double,
 
 	@Json(name="id")
-	val id: String? = null,
+	val id: String,
 
 	@Json(name="lat")
-	val lat: Any? = null
+	val lat: Double
 )

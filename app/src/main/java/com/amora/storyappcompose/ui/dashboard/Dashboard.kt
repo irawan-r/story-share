@@ -68,16 +68,7 @@ fun Dashboard(
                 modifier = modifier
                     .padding(16.dp)
             ) {
-                LazyColumn(modifier = modifier) {
-                    if (listStories is DataState.Success) {
-                        val list = (listStories as DataState.Success<List<StoryItem>>).data as List<StoryItem>
-                        if (list.isNotEmpty()) {
-                            items(list.size) {
 
-                            }
-                        }
-                    }
-                }
             }
         }
     )

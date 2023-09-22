@@ -11,29 +11,5 @@ data class StoryResponse(
 	val message: String? = null,
 
 	@Json(name="story")
-	val story: Story? = null
-)
-
-data class Story(
-
-	@Json(name="photoUrl")
-	val photoUrl: String? = null,
-
-	@Json(name="createdAt")
-	val createdAt: String? = null,
-
-	@Json(name="name")
-	val name: String? = null,
-
-	@Json(name="description")
-	val description: String? = null,
-
-	@Json(name="lon")
-	val lon: Any? = null,
-
-	@Json(name="id")
-	val id: String? = null,
-
-	@Json(name="lat")
-	val lat: Any? = null
+	val story: StoryItem? = null
 )
